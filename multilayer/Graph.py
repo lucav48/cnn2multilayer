@@ -38,6 +38,10 @@ def create_graph(model):
         conv_width_start = int((filters_width - 1) / 2)
         conv_height_start = int((filters_height - 1) / 2)
 
+        if conv_width_start == 0:
+            conv_width_start = 1
+            conv_height_start = 1
+
         for index, t in target.iterrows():
             if width_ratio == 1:
                 # immagini di input e output uguali, semplice convoluzione

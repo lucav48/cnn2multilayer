@@ -60,9 +60,9 @@ def create_graph(model):
                                   (source_y_left <= source['y'])]
             edges = zip(conn['id'].to_list(), [t["id"]] * len(conn))
             cnn_graph.add_edges_from(edges)
-            if "resnet" in model.name:
-                cnn_graph = resnet_layers(model, cnn_graph)
-    print("ADDED EDGES")
+    print("ADDED SEQUENTIAL EDGES")
+    if "resnet" in model.name:
+        cnn_graph = resnet_layers(model, cnn_graph)
     return cnn_graph, patched_layers
 
 
@@ -104,5 +104,5 @@ def resnet_layers(model, cnn_graph):
                 if out[1]["x"] == inp[1]["x"] and out[1]["y"] == inp[1]["y"]:
                     c += 1
                     cnn_graph.add_edge(out[0], inp[0])
-    print("ADDED", c, "EDGES")
+    print("ADDED", c, "SKIP-EDGES")
     return cnn_graph

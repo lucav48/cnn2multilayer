@@ -25,7 +25,9 @@ def get_patched_layers(model):
     id = 1
     patched_layers = []
     #
-    layers = [x for x in model.layers if "Conv" in x.__class__.__name__] + [Conv2D(1, kernel_size=(2, 2))]
+    layers = [x for x in model.layers if "conv" in x.__class__.__name__.lower() and
+              not "_pad" in x.__class__.__name__.lower()] + \
+    [Conv2D(1, kernel_size=(2, 2))]
     for i in range(1, len(layers)):
         source = layers[i - 1]
         target = layers[i]
@@ -47,8 +49,6 @@ def get_layer_filters(layer):
     try:
         if layer_name == 'Conv2D':
             width, height = layer.__dict__["kernel_size"]
-            # width  = layer.kernel.shape[0]
-            # height = layer.kernel.shape[1]
         elif layer_name == 'MaxPooling2D':
             width = layer.pool_size[0]
             height = layer.pool_size[1]

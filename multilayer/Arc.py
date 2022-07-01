@@ -33,8 +33,7 @@ def compute_weights_graph(model, images, patched_layers):
     activations = get_cnn_activations(model, images)
     for i in range(1, len(patched_layers)):
         example_source = patched_layers[i - 1][0]  # get info about filters
-        example_target = patched_layers[i][0]
-        weights_id = layers_name[layers_name.index(example_target["layer_name"]) - 1]
+        weights_id = layers_name[layers_name.index(example_source["layer_name"]) - 1]
         activation_map = activations[weights_id]
         source_img_shape = example_source["width"], example_source["height"]
         target_img_shape = activation_map.shape[1:3]

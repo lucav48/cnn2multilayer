@@ -60,9 +60,10 @@ def compute_weights_graph(model, images, patched_layers):
                 sub_map = activation_map[:, source_x_left:source_x_right,
                           source_y_left:source_y_right, :]
             # features to add to the graph
-            activation_mean = round(np.mean(sub_map), 3)
             if sub_map.size == 0:
                 activation_mean = 0
+            else:
+                activation_mean = round(np.mean(sub_map), 3)
             data[node["id"]] = activation_mean
     data = pd.DataFrame.from_dict(data, orient="index").rename(columns={0: "mean_output"})
     return data

@@ -1,9 +1,10 @@
 from tensorflow.keras.datasets import cifar10, cifar100
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.vgg16 import preprocess_input as vgg16_preprocess_input
-from tensorflow.keras.applications.resnet import preprocess_input as resnet_preprocess_input
+from tensorflow.keras.applications.resnet import preprocess_input as resnetv1_preprocess_input
+from tensorflow.keras.applications.resnet_v2 import preprocess_input as resnetv2_preprocess_input
 from tensorflow.keras.applications.vgg16 import decode_predictions as vgg16_decode_predictions
-from tensorflow.keras.applications.resnet50 import decode_predictions as resnet50_decode_predictions
+from tensorflow.keras.applications.resnet import decode_predictions as resnet_decode_predictions
 import os
 import numpy as np
 
@@ -16,7 +17,11 @@ def get_images(dataset, model_name):
         num_classes = 100
         (x_train, y_train), _ = cifar100.load_data()
     elif dataset.lower() == "imagenet":
-        preprocess_function = model_name + "_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"
+        if "resnet" in model_name.lower():
+            preprocess_function = "resnet_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"
+        else:
+            preprocess_function = model_name + "_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"
+
         labels = eval(preprocess_function)
         labels = {k: v for k, _, v in labels[0]}
         x_train = []
@@ -32,8 +37,10 @@ def get_images(dataset, model_name):
         num_classes = len(set(y_train))
         x_train, y_train = np.array(x_train), np.array(y_train)
 
-    if "resnet" in model_name.lower():
-        x_train = resnet_preprocess_input(x_train)
+    if "resnet" in model_name.lower() and "v2" in model_name.lower():
+        x_train = resnetv2_preprocess_input(x_train)
+    elif "resnet" in model_name.lower():
+        x_train = resnetv1_preprocess_input(x_train)
     else:
         x_train = eval(model_name + "_preprocess_input" + "(x_train)")
     return x_train, y_train, num_classes

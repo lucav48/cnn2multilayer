@@ -73,7 +73,7 @@ def create_graph(model):
 def resnet_layers(model, cnn_graph):
     # search adding layers and conv involved
     adds = {}
-    for i, layer in zip(range(len(model.layers)), model.layers):
+    for i, layer in enumerate(model.layers):
         kind = layer.__class__.__name__
         # find add layer
         if "add" in kind.lower() and "padding" not in kind.lower():
@@ -93,7 +93,7 @@ def resnet_layers(model, cnn_graph):
             # layer input to add
             next_conv = None
             for l in model.layers[i:]:
-                if "conv" in l.name and "bn" not in l.name and "add" not in l.name and "out" not in l.name:
+                if "conv" in l.name and "bn" not in l.name and "add" not in l.name and "out" not in l.name and "preact" not in l.name:
                     next_conv = l.name
                     break
             if next_conv:

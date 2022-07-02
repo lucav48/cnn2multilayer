@@ -1,7 +1,7 @@
 from tensorflow.keras.datasets import cifar10, cifar100
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.vgg16 import preprocess_input as vgg16_preprocess_input
-from tensorflow.keras.applications.resnet50 import preprocess_input as resnet50_preprocess_input
+from tensorflow.keras.applications.resnet import preprocess_input as resnet_preprocess_input
 from tensorflow.keras.applications.vgg16 import decode_predictions as vgg16_decode_predictions
 from tensorflow.keras.applications.resnet50 import decode_predictions as resnet50_decode_predictions
 import os
@@ -32,5 +32,8 @@ def get_images(dataset, model_name):
         num_classes = len(set(y_train))
         x_train, y_train = np.array(x_train), np.array(y_train)
 
-    x_train = eval(model_name + "_preprocess_input" + "(x_train)")
+    if "resnet" in model_name.lower():
+        x_train = resnet_preprocess_input(x_train)
+    else:
+        x_train = eval(model_name + "_preprocess_input" + "(x_train)")
     return x_train, y_train, num_classes

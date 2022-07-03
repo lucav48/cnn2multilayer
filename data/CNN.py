@@ -11,9 +11,9 @@ def get_model(model_name, model_path):
             return ResNet50(weights="imagenet")
         elif model_name == "ResNet50V2":
             return ResNet50V2(weights="imagenet")
-        elif model_name == "ResNet110":
+        elif model_name == "ResNet101":
             return ResNet101(weights="imagenet")
-        elif model_name == "ResNet110V2":
+        elif model_name == "ResNet101V2":
             return ResNet101V2(weights="imagenet")
     else:
         model = load_model(model_path)

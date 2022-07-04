@@ -1,20 +1,10 @@
-from tensorflow.keras.applications import ResNet50, VGG16, ResNet50V2, ResNet101, ResNet101V2
+from tensorflow.keras.applications import *
 from tensorflow.keras.models import load_model
-from tensorflow.saved_model import LoadOptions
 
 
 def get_model(model_name, model_path):
-    if model_name:
-        if model_name == "VGG16":
-            return VGG16(weights="imagenet")
-        elif model_name == "ResNet50":
-            return ResNet50(weights="imagenet")
-        elif model_name == "ResNet50V2":
-            return ResNet50V2(weights="imagenet")
-        elif model_name == "ResNet101":
-            return ResNet101(weights="imagenet")
-        elif model_name == "ResNet101V2":
-            return ResNet101V2(weights="imagenet")
-    else:
+    if model_path:
         model = load_model(model_path)
+    else:
+        model = eval(model_name + "(weights='imagenet')")
     return model

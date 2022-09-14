@@ -13,9 +13,12 @@ def get_images(dataset, model_name):
     if dataset.lower() == "cifar10":
         num_classes = 10
         (x_train, y_train), _ = cifar10.load_data()
+        y_train = y_train.flatten()
+        print()
     elif dataset.lower() == "cifar100":
         num_classes = 100
         (x_train, y_train), _ = cifar100.load_data()
+        y_train = y_train.flatten()
     elif dataset.lower() == "imagenet":
         if "resnet" in model_name.lower():
             preprocess_function = "resnet_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"

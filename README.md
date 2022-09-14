@@ -8,7 +8,7 @@ Required libraries: pandas, networkx, tensorflow.
 ## Usage
 main.py is the script to generate a multilayer network starting from a CNN model. It needs 4 parameters:
 - model_name: model name from Keras from https://keras.io/api/applications/ (e.g. VGG16, ResNet50). Required if model_path not required. It downloads the pretrained CNN model from keras.
-- model_path: model path containing the CNN to load. Actually .h5 file support. Required if model_name not provided.
+- model_path: model path containing the CNN to load. Actually .h5 file support. Required if model_name not provided. If you work with CIFAR10 or CIFAR100 please use this setting instead of model name.
 - dataset: dataset name for the multilayer arcs weights (supporting CIFAR10, CIFAR100, IMAGENET)
 - images_range: if you want to study a subset of images (e.g. get the feature maps of few images and put them as weights of the multilayer network), insert here the range of images to pick (e.g. 10-11 for the 10th image, 10-20 for the 10th image to the 19th image of the selected dataset)
 

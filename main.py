@@ -23,7 +23,7 @@ if __name__ == "__main__":
                                                'the 10th image to the 19th image', required=True)
     args = parser.parse_args()
 
-    model = get_model(args.model_name, args.model_path)
+    model = get_model(args.model_name, args.model_path, args.dataset)
     dataset = args.dataset
     model_name = model.name
 

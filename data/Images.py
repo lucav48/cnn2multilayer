@@ -33,7 +33,7 @@ def get_images(dataset, model_name):
         num_classes = 101
         if len(os.listdir("data/caltech")) < 2:
             # empty folder, download dataset
-            url = 'https://drive.google.com/uc?id=137RyRjvTBkBiIfeYBNZBtViDHQ6_Ewsp'
+            url = 'https://drive.google.com/uc?id=1n28fjRzJ3xpoETicjcs6WxfVa3l8mrwY'
             output = "data/caltech/101_ObjectCategories.tar.gz"
             gdown.download(url, output, quiet=False)
             # extract

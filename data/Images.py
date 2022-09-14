@@ -1,6 +1,7 @@
 from tensorflow.keras.datasets import cifar10, cifar100
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.vgg16 import preprocess_input as vgg16_preprocess_input
+from tensorflow.keras.applications.vgg19 import preprocess_input as vgg19_preprocess_input
 from tensorflow.keras.applications.resnet import preprocess_input as resnetv1_preprocess_input
 from tensorflow.keras.applications.resnet_v2 import preprocess_input as resnetv2_preprocess_input
 from tensorflow.keras.applications.vgg16 import decode_predictions as vgg16_decode_predictions

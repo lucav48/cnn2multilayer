@@ -1,4 +1,4 @@
-from tensorflow.keras.layers import Conv2D
+from tensorflow.keras.layers import Conv2D, InputLayer
 
 
 def get_layer_dimensions(layer):
@@ -24,10 +24,8 @@ def get_layer_dimensions(layer):
 def get_patched_layers(model):
     id = 1
     patched_layers = []
-    #
     layers = [x for x in model.layers if "conv" in x.__class__.__name__.lower() and
-              not "_pad" in x.__class__.__name__.lower()] + \
-    [Conv2D(1, kernel_size=(2, 2))]
+              not "_pad" in x.__class__.__name__.lower()] + [Conv2D(1, kernel_size=(2, 2))]
     for i in range(1, len(layers)):
         source = layers[i - 1]
         target = layers[i]

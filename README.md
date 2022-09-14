@@ -12,6 +12,10 @@ main.py is the script to generate a multilayer network starting from a CNN model
 - dataset: dataset name for the multilayer arcs weights (supporting CIFAR10, CIFAR100, IMAGENET)
 - images_range: if you want to study a subset of images (e.g. get the feature maps of few images and put them as weights of the multilayer network), insert here the range of images to pick (e.g. 10-11 for the 10th image, 10-20 for the 10th image to the 19th image of the selected dataset)
 
+### Warning
+- The default models are pretrained on imagenet (as available in Keras applications).
+- MNIST has only a pretrained VGG16 that we download from google drrive and then load from data/mnist/vgg16-mnist.h5
+- If it does not download the Caltech101 dataset, use this (link)[https://drive.google.com/uc?id=137RyRjvTBkBiIfeYBNZBtViDHQ6_Ewsp] and place the file in "data/caltech" folder.
 **Example run**:
 ```
 python3 main.py --model_name VGG16 --dataset imagenet --images_range 1-2

@@ -1,1 +1,2 @@
 .idea/*
+data/mnist/vgg16-mnist.h5

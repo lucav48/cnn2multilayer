@@ -6,7 +6,7 @@ from keras import backend as K
 def get_cnn_activations(model, images):
     # define a function to get the activation of all layers
     outputs = []
-    for i in range(len(model.layers)):
+    for i in range(1, len(model.layers)):
         if model.layers[i].__class__.__name__ == "Conv2D":
             outputs.append(model.layers[i - 1].output)
     active_func = K.function([model.input], [outputs])
@@ -33,6 +33,9 @@ def compute_weights_graph(model, images, patched_layers):
     activations = get_cnn_activations(model, images)
     for i in range(1, len(patched_layers)):
         example_source = patched_layers[i - 1][0]  # get info about filters
+        if layers_name.index(example_source["layer_name"]) - 1 < 0:
+            # actual layer has no predecessor
+            continue
         weights_id = layers_name[layers_name.index(example_source["layer_name"]) - 1]
         activation_map = activations[weights_id]
         source_img_shape = example_source["width"], example_source["height"]

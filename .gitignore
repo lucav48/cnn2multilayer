@@ -1,2 +1,4 @@
 .idea/*
-data/mnist/vgg16-mnist.h5
+data/models/vgg16-mnist.h5
+data/models/vgg16-cifar10.h5
+data/models/vgg16-cifar100.h5

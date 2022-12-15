@@ -25,11 +25,14 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', help='Model path to load')
     parser.add_argument('--dataset', help='Dataset for the multilayer arcs weights (CIFAR10, CIFAR100, IMAGENET)', required=True)
     parser.add_argument('--image_path', help='Specify path of the image', required=True)
+    parser.add_argument('--aggregation', help="Function for aggregating the activation maps (i.e., mean, max, entropy, sum)",
+                        required=True)
     args = parser.parse_args()
 
     model = get_model(args.model_name, args.model_path, args.dataset)
     dataset = args.dataset
     model_name = model.name
+    aggregation = args.aggregation
 
     image = image.load_img(args.image_path, target_size=(224, 224))
     image = np.expand_dims(image, axis=0)
@@ -50,7 +53,7 @@ if __name__ == "__main__":
         patched_layers = get_patched_layers(model)
 
     # add weights to the graph
-    weights_label = compute_weights_graph(model, image, patched_layers)
+    weights_label = compute_weights_graph(model, image, patched_layers, aggregation)
     weights_label.to_csv(
         sna_dataset_path + dataset + "/" + dataset + "-" + model_name + "_" +
         args.image_path.split("/")[-1].split(".")[0] + ".csv")

@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import numpy as np
 from keras import backend as K
@@ -27,11 +29,11 @@ def get_cnn_activations(model, images):
     return all_activations
 
 
-def compute_weights_graph(model, images, patched_layers):
+def compute_weights_graph(model, images, patched_layers, aggregation):
     data = {}
     layers_name = [x.name for x in model.layers]
     activations = get_cnn_activations(model, images)
-    for i in range(1, len(patched_layers)):
+    for i in range(4, len(patched_layers)):
         example_source = patched_layers[i - 1][0]  # get info about filters
         if layers_name.index(example_source["layer_name"]) - 1 < 0:
             # actual layer has no predecessor
@@ -64,9 +66,29 @@ def compute_weights_graph(model, images, patched_layers):
                           source_y_left:source_y_right, :]
             # features to add to the graph
             if sub_map.size == 0:
-                activation_mean = 0
+                activation = 0
             else:
-                activation_mean = round(np.mean(sub_map), 3)
-            data[node["id"]] = activation_mean
+                if aggregation == "mean":
+                    activation = round(np.mean(sub_map), 3)
+                elif aggregation == "max":
+                    activation = round(np.max(sub_map), 3)
+                elif aggregation == "sum":
+                    activation = round(np.sum(sub_map), 3)
+                elif aggregation == "entropy":
+                    filter = np.sum(np.sum(sub_map, axis=2), axis=1)
+                    total = np.sum(filter)
+                    max_e = 0
+                    index_e = 0
+                    for i, f in enumerate(filter[0]):
+                        try:
+                            e = - 1 * (f / total * math.log2(f / total))
+                            if e > max_e:
+                                max_e = float(e)
+                                index_e = int(i)
+                        except:
+                            continue
+                    activation = max_e
+
+            data[node["id"]] = activation
     data = pd.DataFrame.from_dict(data, orient="index").rename(columns={0: "mean_output"})
     return data

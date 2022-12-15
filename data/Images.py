@@ -46,7 +46,7 @@ def get_images(dataset, model_name):
         y_train = []
         base_path = "data/caltech/101_ObjectCategories"
         i = 0
-        for directory in os.listdir(base_path):
+        for directory in sorted(os.listdir(base_path)):
             n_img = 0
             for img in os.listdir(base_path + "/" + directory):
                 img = image.load_img(base_path + "/" + directory + "/" + img, target_size=(224, 224))
@@ -80,12 +80,17 @@ def get_images(dataset, model_name):
         num_classes = len(set(y_train))
         x_train, y_train = np.array(x_train), np.array(y_train)
 
-    if "resnet" in model_name.lower() and "v2" in model_name.lower():
-        x_train = resnetv2_preprocess_input(x_train)
-    elif "resnet" in model_name.lower():
-        x_train = resnetv1_preprocess_input(x_train)
-    elif dataset.lower() == "mnist":
-        x_train = x_train / 255
-    else:
-        x_train = eval(model_name + "_preprocess_input" + "(x_train)")
+    x_train = preprocess(x_train, dataset, model_name)
     return x_train, y_train, num_classes
+
+
+def preprocess(x, dataset, model_name):
+    if "resnet" in model_name.lower() and "v2" in model_name.lower():
+        x = resnetv2_preprocess_input(x)
+    elif "resnet" in model_name.lower():
+        x = resnetv1_preprocess_input(x)
+    elif dataset.lower() == "mnist":
+        x = x / 255
+    else:
+        x = eval(model_name + "_preprocess_input" + "(x)")
+    return x

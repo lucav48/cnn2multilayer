@@ -52,5 +52,6 @@ if __name__ == "__main__":
     # add weights to the graph
     weights_label = compute_weights_graph(model, image, patched_layers)
     weights_label.to_csv(
-        sna_dataset_path + dataset + "/" + dataset + "-" + model_name + "_" + args.image_path.split("/")[-1] + ".csv")
+        sna_dataset_path + dataset + "/" + dataset + "-" + model_name + "_" +
+        args.image_path.split("/")[-1].split(".")[0] + ".csv")
 

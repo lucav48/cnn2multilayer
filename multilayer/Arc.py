@@ -33,7 +33,7 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
     data = {}
     layers_name = [x.name for x in model.layers]
     activations = get_cnn_activations(model, images)
-    for i in range(4, len(patched_layers)):
+    for i in range(1, len(patched_layers)):
         example_source = patched_layers[i - 1][0]  # get info about filters
         if layers_name.index(example_source["layer_name"]) - 1 < 0:
             # actual layer has no predecessor
@@ -90,5 +90,5 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                     activation = max_e
 
             data[node["id"]] = activation
-    data = pd.DataFrame.from_dict(data, orient="index").rename(columns={0: "mean_output"})
+    data = pd.DataFrame.from_dict(data, orient="index").rename(columns={0: "output"})
     return data

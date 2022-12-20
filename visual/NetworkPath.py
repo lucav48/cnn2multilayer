@@ -3,13 +3,14 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def single_network(single_path, dataset, model_name, labels):
+def single_network(single_path, dataset, model_name, labels, base_graph=None):
     graphs = {}
     path = "output/" + dataset + "/"
     nodes_attributes = pd.read_csv(path + dataset + "-" + model_name.lower() + "_nodes.csv", index_col="id")
     nodes_attributes.index = nodes_attributes.index.astype(str)
     nodes_attributes = nodes_attributes.to_dict(orient="index")
-    base_graph = nx.read_gexf(path + dataset + "-" + model_name.lower() + ".gexf")
+    if not base_graph:
+        base_graph = nx.read_gexf(path + dataset + "-" + model_name.lower() + ".gexf")
     filename = single_path.split("/")[-1].replace(".jpg", ".csv")
     csv_file = path + dataset + "-" + model_name.lower() + "_" + filename
     df = pd.read_csv(csv_file, index_col=0)

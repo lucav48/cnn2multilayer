@@ -16,7 +16,7 @@ def get_model(model_name, model_path, dataset):
         # custom models
         full_model = model_name.lower() + "-" + dataset + ".h5"
         if full_model in drive:
-            print("SETUP CUSTOM MODEL")
+            #print("SETUP CUSTOM MODEL")
             if not os.path.exists("data/models/" + full_model):
                 url = drive[full_model]
                 output = "data/models/" + full_model
@@ -24,7 +24,7 @@ def get_model(model_name, model_path, dataset):
             model = load_model("data/models/" + full_model)
             model._name = model_name.lower()
         else:
-            print("DEFAULT MODEL WITH IMAGENET WEIGHTS")
+            #print("DEFAULT MODEL WITH IMAGENET WEIGHTS")
             if dataset == "mnist":
                 model = eval(model_name + "(weights='imagenet', input_shape=(28,28,1), classes=10, include_top=False)")
             elif dataset == "cifar10":

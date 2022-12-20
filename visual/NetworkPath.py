@@ -36,7 +36,7 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
     nodes_first_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == first_layer]
     nodes_last_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == last_layer]
 
-    print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
+    # print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
 
     # compute weighted degree
     nodes_first_layer_weighted = {}
@@ -50,10 +50,10 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
         d = graphs[image_class].degree(node, weight="weight")
         nodes_last_layer_weighted[node] = d
 
-    print("FIRST LAYER: " + str(len(nodes_first_layer)) + " LAST LAYER: " + str(len(nodes_last_layer)))
-    # ---------------- SECONDO GREEDY ------------------
+    # print("FIRST LAYER: " + str(len(nodes_first_layer)) + " LAST LAYER: " + str(len(nodes_last_layer)))
+    # ---------------- GREEDY ------------------
     w_path = {}
-    for n in tqdm(nodes_last_layer):
+    for n in nodes_last_layer: #tqdm(nodes_last_layer):
         explore = {m: graphs[image_class].degree(m, weight="weight") for m in graphs[image_class].predecessors(n)}
         explore = dict(sorted(explore.items(), key=lambda item: item[1], reverse=True))
         explore = {k: explore[k] for k in list(explore.keys())[:max_per_node]}

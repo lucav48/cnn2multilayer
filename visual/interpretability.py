@@ -1,7 +1,5 @@
 import os
-
 import pandas as pd
-
 from data import Images
 from visual.Heatmap import compute_heatmap
 from visual.NetworkPath import single_network, compute_paths
@@ -10,6 +8,7 @@ import numpy as np
 from data.Images import preprocess
 from Metrics import *
 from data.CNN import get_model
+from tqdm import tqdm
 
 
 def single_run(model_name, dataset, single_path):
@@ -41,21 +40,32 @@ def single_run(model_name, dataset, single_path):
     return (inc, drop), (curve_insert, auc_insert), (curve_deletion, auc_deletion)
 
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 dataset = "imagenet"
 model_name = "VGG16"
 # single_path = "data/imagen/n01443537_5048_goldfish.jpg"
+base_path = "data/imagen/"
 
-for single_path in os.listdir("data/imagen"):
-    avg_inc_drop, insert, deletion = single_run(model_name, dataset, single_path)
+c = [x.split("_")[0] for x in os.listdir("data/imagen")]
+intersection_images = set(Images.get_labels(model_name).keys()).intersection(set(c))
 
-    image_name = single_path.split("/")[-1].replace(".jpg", "")
-    d = {
-         "auc_inc": avg_inc_drop[0],
-         "auc_drop": avg_inc_drop[1],
-         "curve_insert": insert[0],
-         "auc_insert": insert[1],
-         "curve_deletion": deletion[0],
-         "auc_deletion": deletion[1]
-         }
-    d = pd.DataFrame.from_dict(d)
-    d.to_csv("visual/results/" + image_name + ".csv")
+for single_path in tqdm(os.listdir("data/imagen")):
+    try:
+        c_path = single_path.split("_")[0]
+        if c_path not in intersection_images:
+            continue
+        avg_inc_drop, insert, deletion = single_run(model_name, dataset, base_path + single_path)
+
+        image_name = single_path.split("/")[-1].replace(".jpg", "")
+        d = {
+             "auc_inc": avg_inc_drop[0],
+             "auc_drop": avg_inc_drop[1],
+             "curve_insert": insert[0],
+             "auc_insert": insert[1],
+             "curve_deletion": deletion[0],
+             "auc_deletion": deletion[1]
+             }
+        d = pd.DataFrame.from_dict(d)
+        d.to_csv("visual/results/" + image_name + ".csv")
+    except Exception as e:
+        print(single_path, e)

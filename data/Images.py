@@ -92,5 +92,15 @@ def preprocess(x, dataset, model_name):
     elif dataset.lower() == "mnist":
         x = x / 255
     else:
-        x = eval(model_name + "_preprocess_input" + "(x)")
+        x = eval(model_name.lower() + "_preprocess_input" + "(x)")
     return x
+
+
+def get_labels(model_name):
+    if "resnet" in model_name.lower():
+        preprocess_function = "resnet_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"
+    else:
+        preprocess_function = model_name.lower() + "_decode_predictions" + "(np.expand_dims(np.arange(1000), 0), top=1000)"
+    labels = eval(preprocess_function)
+    labels = {k: v for k, _, v in labels[0]}
+    return labels

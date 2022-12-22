@@ -75,11 +75,11 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                 elif aggregation == "sum":
                     activation = round(np.sum(sub_map), 3)
                 elif aggregation == "entropy-single":
-                    filter = np.sum(np.sum(sub_map, axis=2), axis=1)
-                    total = np.sum(filter)
+                    filters = np.sum(np.sum(sub_map, axis=1), axis=2)
+                    total = np.sum(filters)
                     max_e = 0
                     index_e = 0
-                    for i, f in enumerate(filter[0]):
+                    for i, f in enumerate(filters[0]):
                         try:
                             e = - 1 * (f / total * math.log2(f / total))
                             if e > max_e:
@@ -89,10 +89,11 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                             continue
                     activation = max_e
                 elif aggregation == "entropy-sum":
-                    filter = np.sum(np.sum(sub_map, axis=2), axis=1)
-                    total = np.sum(filter)
+                    filters = np.sum(sub_map, axis=0)
+                    filters = np.sum(np.sum(filters, axis=0), axis=1)
+                    total = np.sum(filters)
                     e = 0
-                    for f in filter[0]:
+                    for f in filters:
                         try:
                             e += - 1 * (f / total * math.log2(f / total))
                         except:

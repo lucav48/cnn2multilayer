@@ -74,21 +74,31 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                     activation = round(np.max(sub_map), 3)
                 elif aggregation == "sum":
                     activation = round(np.sum(sub_map), 3)
-                elif aggregation == "entropy-single":
+                elif aggregation == "max-entropy":
                     filters = np.sum(np.sum(sub_map, axis=1), axis=2)
                     total = np.sum(filters)
                     max_e = 0
-                    index_e = 0
                     for i, f in enumerate(filters[0]):
                         try:
                             e = - 1 * (f / total * math.log2(f / total))
                             if e > max_e:
                                 max_e = float(e)
-                                index_e = int(i)
                         except:
                             continue
                     activation = max_e
-                elif aggregation == "entropy-sum":
+                elif aggregation == "min-entropy":
+                    filters = np.sum(np.sum(sub_map, axis=1), axis=2)
+                    total = np.sum(filters)
+                    min_e = 1e9
+                    for i, f in enumerate(filters[0]):
+                        try:
+                            e = - 1 * (f / total * math.log2(f / total))
+                            if e < min_e:
+                                min_e = float(e)
+                        except:
+                            continue
+                    activation = min_e
+                elif aggregation == "sum-entropy":
                     filters = np.sum(sub_map, axis=0)
                     filters = np.sum(np.sum(filters, axis=0), axis=1)
                     total = np.sum(filters)
@@ -99,6 +109,17 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                         except:
                             continue
                     activation = e
+                elif aggregation == "mean-entropy":
+                    filters = np.sum(sub_map, axis=0)
+                    filters = np.sum(np.sum(filters, axis=0), axis=1)
+                    total = np.sum(filters)
+                    e = 0
+                    for f in filters:
+                        try:
+                            e += - 1 * (f / total * math.log2(f / total))
+                        except:
+                            continue
+                    activation = e / len(total)
                 elif aggregation == "max-filter":
                     filters = np.sum(sub_map, axis=0)
                     filters = np.sum(np.sum(filters, axis=0), axis=1)

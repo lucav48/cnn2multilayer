@@ -120,11 +120,11 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                         except:
                             continue
                     activation = e / len(filters)
-                elif aggregation == "max-filter":
+                elif aggregation == "max_filter":
                     filters = np.sum(sub_map, axis=0)
                     filters = np.sum(np.sum(filters, axis=0), axis=1)
                     activation = max(filters)
-                elif aggregation == "mean-filter":
+                elif aggregation == "mean_filter":
                     filters = np.sum(sub_map, axis=0)
                     filters = np.sum(np.sum(filters, axis=0), axis=1)
                     activation = sum(filters) / len(filters)

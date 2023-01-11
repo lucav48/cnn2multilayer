@@ -99,6 +99,14 @@ def compute_weights_graph(model, images, patched_layers, aggregation):
                         except:
                             continue
                     activation = e
+                elif aggregation == "max-filter":
+                    filters = np.sum(sub_map, axis=0)
+                    filters = np.sum(np.sum(filters, axis=0), axis=1)
+                    activation = max(filters)
+                elif aggregation == "mean-filter":
+                    filters = np.sum(sub_map, axis=0)
+                    filters = np.sum(np.sum(filters, axis=0), axis=1)
+                    activation = sum(filters) / len(filters)
 
             data[node["id"]] = activation
     data = pd.DataFrame.from_dict(data, orient="index").rename(columns={0: "output"})

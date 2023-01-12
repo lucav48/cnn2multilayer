@@ -1,6 +1,7 @@
 import networkx as nx
 import pandas as pd
 from tqdm import tqdm
+import numpy as np
 
 
 def single_network(single_path, dataset, model_name, labels, base_graph=None):
@@ -29,7 +30,7 @@ def single_network(single_path, dataset, model_name, labels, base_graph=None):
     return graphs, nodes_attributes
 
 
-def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_node=4):
+def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_node=4, th_paths=0.75):
     one_key = list(graphs.keys())[0]
     first_layer = graphs[one_key].nodes[list(graphs[one_key].nodes)[0]]["layer_name"]
     last_layer = graphs[one_key].nodes[list(graphs[one_key].nodes)[-1]]["layer_name"]
@@ -37,48 +38,41 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
     nodes_first_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == first_layer]
     nodes_last_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == last_layer]
 
-    # print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
+    print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
 
-    # compute weighted degree
-    nodes_first_layer_weighted = {}
-    nodes_last_layer_weighted = {}
-
-    for node in nodes_first_layer:
-        d = graphs[image_class].degree(node, weight="weight")
-        nodes_first_layer_weighted[node] = d
-
-    for node in nodes_last_layer:
-        d = graphs[image_class].degree(node, weight="weight")
-        nodes_last_layer_weighted[node] = d
-
-    # print("FIRST LAYER: " + str(len(nodes_first_layer)) + " LAST LAYER: " + str(len(nodes_last_layer)))
-    # ---------------- GREEDY ------------------
+    # ---------------- SECONDO GREEDY ------------------
     w_path = {}
-    for n in nodes_last_layer: #tqdm(nodes_last_layer):
-        explore = {m: graphs[image_class].degree(m, weight="weight") for m in graphs[image_class].predecessors(n)}
+
+    for n in tqdm(nodes_last_layer[::10]):
+        explore = {x[0]: x[2]["weight"] for x in graphs[image_class].in_edges(n, data=True)}
         explore = dict(sorted(explore.items(), key=lambda item: item[1], reverse=True))
         explore = {k: explore[k] for k in list(explore.keys())[:max_per_node]}
         while len(explore) > 0:
             node, weight = list(explore.keys())[0], list(explore.values())[0]
             del explore[node]
-            nodes_explore = {m: graphs[image_class].degree(m, weight="weight") for m in
-                             graphs[image_class].predecessors(node)}
+            nodes_explore = {x[0]: x[2]["weight"] for x in graphs[image_class].in_edges(node, data=True)}
             if len(nodes_explore) > 0:
                 nodes_explore = dict(sorted(nodes_explore.items(), key=lambda item: item[1], reverse=True))
                 nodes_explore = {k: nodes_explore[k] + weight for k in list(nodes_explore.keys())[:max_per_node]}
                 explore.update(nodes_explore)
             else:
-                # node is in the first layer
-                w_path[(n, node)] = weight
-    # extract pixels
-    pixels = []
+                if node in w_path:
+                    w_path[node] += weight
+                else:
+                    w_path[node] = weight
 
-    for n1, n2 in w_path.keys():
-        if "resnet" in model_name:
-            # resnet ha subito un conv ed un max pooling. devo convertire le coordinate post
-            # max pooling in coordinate dell'immagine in input
-            x, y = (nodes_attributes[n2]["x"] - 1) * 2, (nodes_attributes[n2]["y"] - 1) * 2
-        else:
-            x, y = nodes_attributes[n2]["x"], nodes_attributes[n2]["y"]
-        pixels.append((x, y))
+    # extract pixels
+    pixels = {}
+    th_weights = np.quantile(list(w_path.values()), th_paths)
+    for n, w in w_path.items():
+        if w > th_weights:
+            if "resnet" in model_name:
+                # resnet ha subito un conv ed un max pooling. devo convertire le coordinate post
+                # max pooling in coordinate dell'immagine in input
+                x, y = (nodes_attributes[n]["x"] - 1) * 2, (nodes_attributes[n]["y"] - 1) * 2
+            else:
+                x, y = nodes_attributes[n]["x"], nodes_attributes[n]["y"]
+            pixels[(x, y)] = w
+
+    print("N PATHS:", len(pixels))
     return pixels

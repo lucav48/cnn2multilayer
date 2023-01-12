@@ -1,34 +1,27 @@
 import numpy as np
 from skimage.segmentation import flood_fill
 from matplotlib import cm
+import matplotlib.pyplot as plt
+from astropy.convolution import Gaussian2DKernel
+from astropy.convolution import convolve
+from tensorflow.keras.utils import array_to_img, img_to_array
 
 
 def compute_heatmap(img, pixels):
     # create heatmap
-    count_pixels = {}
-    heatmap = np.zeros((img[0].shape[0], img[0].shape[1]), dtype=int)
-    for x, y in pixels:
-        for i in range(-3, 4, 1):
-            for j in range(-3, 4, 1):
+    heatmap = np.zeros((img[0].shape[0], img[0].shape[1]))
+    for (x, y), v in list(pixels.items()):
+        for i in range(-1, 2, 1):
+            for j in range(-1, 2, 1):
                 x_i = x + i
                 y_j = y + j
                 try:
-                    if (x_i, y_j) in count_pixels:
-                        count_pixels[(x_i, y_j)] += 1
-                        heatmap[x_i, y_j] += 1
-                        heatmap[x_i, y_j] += 1
-                        heatmap[x_i, y_j] += 1
-                    else:
-                        count_pixels[(x_i, y_j)] = 1
-                        heatmap[x_i, y_j] = 1
-                        heatmap[x_i, y_j] = 1
-                        heatmap[x_i, y_j] = 1
+                    heatmap[x_i, y_j] += v
                 except:
                     continue
-    for p, v in count_pixels.items():
-        heatmap = flood_fill(heatmap, seed_point=p, new_value=v, connectivity=1)
     heatmap = heatmap / np.max(heatmap)
-    return heatmap, count_pixels
+    heatmap = convolve(heatmap, Gaussian2DKernel(x_stddev=2, y_stddev=2))
+    return heatmap
 
 
 def plot_heatmap(img, normalized_heatmap):
@@ -56,3 +49,4 @@ def plot_heatmap(img, normalized_heatmap):
     # Display Grad CAM
     fig = plt.figure(figsize=(8, 8))
     plt.imshow(superimposed_img)
+    plt.show()

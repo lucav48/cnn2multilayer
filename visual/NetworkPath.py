@@ -60,7 +60,7 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
     nodes_first_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == first_layer]
     nodes_last_layer = [x[0] for x in graphs[one_key].nodes(data=True) if x[1]["layer_name"] == last_layer]
 
-    print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
+    # print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
 
     all_dict = Parallel(n_jobs=-1)([delayed(one_node)(n, graphs[image_class], max_per_node) for n in nodes_last_layer[::10]])
     w_path = {}
@@ -84,5 +84,5 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
                 x, y = nodes_attributes[n]["x"], nodes_attributes[n]["y"]
             pixels[(x, y)] = w
 
-    print("N PATHS:", len(pixels))
+    # print("N PATHS:", len(pixels))
     return pixels

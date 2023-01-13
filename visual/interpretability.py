@@ -1,12 +1,12 @@
 import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import pandas as pd
 from data import Images
-from visual.GradCAM import make_gradcam_heatmap
-from visual.Heatmap import compute_heatmap, plot_heatmap
+from visual.approaches.GradCAM import make_gradcam_heatmap
+from visual.Heatmap import compute_heatmap
 from visual.NetworkPath import single_network, compute_paths
 from tensorflow.keras.preprocessing import image as keras_image
-import numpy as np
 from data.Images import preprocess
 from Metrics import *
 from data.CNN import get_model
@@ -46,20 +46,7 @@ def single_run(model_name, dataset, single_path, base_graph, max_per_node=1, th_
     avg_curve, avg_inc, avg_drop = average_drop_increase(heatmap, p_img, model, dataset, ground_class, labels)
     curve_insert, auc_insert = insert_metric(heatmap, p_img, model, dataset, ground_class, labels)
     curve_deletion, auc_deletion = deletion_metric(heatmap, p_img, model, dataset, ground_class, labels)
-
-    # competitor
-    last_node = list(multilayer[ground_class].nodes)[-1]
-    last_layer = multilayer[ground_class].nodes[last_node]["layer_name"]
-    grad = make_gradcam_heatmap(image, model, last_layer, pred_index=ground_class)
-    resized_grad = grad.copy()
-    resized_grad = np.resize(resized_grad, (image[0].shape[0], image[0].shape[1]))
-    grad_avg_curve, grad_inc, grad_drop = average_drop_increase(resized_grad, p_img, model, dataset, ground_class, labels)
-    grad_curve_insert, grad_auc_insert = insert_metric(resized_grad, p_img, model, dataset, ground_class, labels)
-    grad_curve_deletion, grad_auc_deletion = deletion_metric(resized_grad, p_img, model, dataset, ground_class, labels)
-
-    return [(avg_curve, avg_inc, avg_drop), (curve_insert, auc_insert), (curve_deletion, auc_deletion)], \
-           [(grad_avg_curve, grad_inc, grad_drop), (grad_curve_insert, grad_auc_insert),
-            (grad_curve_deletion, grad_auc_deletion)]
+    return (avg_curve, avg_inc, avg_drop), (curve_insert, auc_insert), (curve_deletion, auc_deletion)
 
 
 dataset = "imagenet"
@@ -78,11 +65,9 @@ for single_path in tqdm(os.listdir("data/imagen")):
         c_path = single_path.split("_")[0]
         if c_path not in intersection_images:
             continue
-        mine, competitor = single_run(model_name, dataset, base_path + single_path,
-                                      base_graph=base_graph,
-                                      max_per_node=max_per_node)
-        avg_inc_drop, insert, deletion = mine
-        grad_avg, grad_insert, grad_deletion = competitor
+        avg_inc_drop, insert, deletion = single_run(model_name, dataset, base_path + single_path,
+                                                    base_graph=base_graph,
+                                                    max_per_node=max_per_node)
         image_name = single_path.split("/")[-1].replace(".jpg", "")
         d = {
             "avg_curve": avg_inc_drop[0],
@@ -91,18 +76,10 @@ for single_path in tqdm(os.listdir("data/imagen")):
             "curve_insert": insert[0],
             "auc_insert": insert[1],
             "curve_deletion": deletion[0],
-            "auc_deletion": deletion[1],
-
-            "grad_avg_curve": grad_avg[0],
-            "grad_avg_inc": grad_avg[1],
-            "grad_avg_drop": grad_avg[2],
-            "grad_curve_insert": grad_insert[0],
-            "grad_auc_insert": grad_insert[1],
-            "grad_curve_deletion": grad_deletion[0],
-            "grad_auc_deletion": grad_deletion[1],
+            "auc_deletion": deletion[1]
         }
         d = pd.DataFrame.from_dict(d)
-        d.to_csv("visual/results/" + image_name + "_" + str(max_per_node) + ".csv")
+        d.to_csv("visual/results/" + image_name + "_" + str(max_per_node) + "_" + str(th_paths) + ".csv")
         count += 1
         if count >= 30:
             break

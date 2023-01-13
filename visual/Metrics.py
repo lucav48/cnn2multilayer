@@ -25,7 +25,7 @@ def average_drop_increase(heatmap, img, model, dataset, ground_class, labels):
     # drop
     drop = 0
     for th, (c1, c2) in curve.items():
-        drop += max([0, (c1 - c2)]) / c1
+        drop += max([0, (c1 - c2)]) / (c1 + 1e-6)
     drop = drop / len(curve) * 100
     return curve, inc, drop
 

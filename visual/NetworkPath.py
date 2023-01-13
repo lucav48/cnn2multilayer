@@ -2,6 +2,7 @@ import networkx as nx
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
+from joblib import Parallel, delayed
 
 
 def single_network(single_path, dataset, model_name, labels, base_graph=None):
@@ -30,6 +31,27 @@ def single_network(single_path, dataset, model_name, labels, base_graph=None):
     return graphs, nodes_attributes
 
 
+def one_node(n, graph, max_per_node=1):
+    w_path = {}
+    explore = {x[0]: x[2]["weight"] for x in graph.in_edges(n, data=True)}
+    explore = dict(sorted(explore.items(), key=lambda item: item[1], reverse=True))
+    explore = {k: explore[k] for k in list(explore.keys())[:max_per_node]}
+    while len(explore) > 0:
+        node, weight = list(explore.keys())[0], list(explore.values())[0]
+        del explore[node]
+        nodes_explore = {x[0]: x[2]["weight"] for x in graph.in_edges(node, data=True)}
+        if len(nodes_explore) > 0:
+            nodes_explore = dict(sorted(nodes_explore.items(), key=lambda item: item[1], reverse=True))
+            nodes_explore = {k: nodes_explore[k] + weight for k in list(nodes_explore.keys())[:max_per_node]}
+            explore.update(nodes_explore)
+        else:
+            if node in w_path:
+                w_path[node] += weight
+            else:
+                w_path[node] = weight
+    return w_path
+
+
 def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_node=4, th_paths=0.75):
     one_key = list(graphs.keys())[0]
     first_layer = graphs[one_key].nodes[list(graphs[one_key].nodes)[0]]["layer_name"]
@@ -40,26 +62,14 @@ def compute_paths(graphs, model_name, image_class, nodes_attributes, max_per_nod
 
     print("FIRST:", first_layer, "(", len(nodes_first_layer), ") LAST:", last_layer, "(", len(nodes_last_layer), ")")
 
-    # ---------------- SECONDO GREEDY ------------------
+    all_dict = Parallel(n_jobs=-1)([delayed(one_node)(n, graphs[image_class], max_per_node) for n in nodes_last_layer[::10]])
     w_path = {}
-
-    for n in tqdm(nodes_last_layer[::10]):
-        explore = {x[0]: x[2]["weight"] for x in graphs[image_class].in_edges(n, data=True)}
-        explore = dict(sorted(explore.items(), key=lambda item: item[1], reverse=True))
-        explore = {k: explore[k] for k in list(explore.keys())[:max_per_node]}
-        while len(explore) > 0:
-            node, weight = list(explore.keys())[0], list(explore.values())[0]
-            del explore[node]
-            nodes_explore = {x[0]: x[2]["weight"] for x in graphs[image_class].in_edges(node, data=True)}
-            if len(nodes_explore) > 0:
-                nodes_explore = dict(sorted(nodes_explore.items(), key=lambda item: item[1], reverse=True))
-                nodes_explore = {k: nodes_explore[k] + weight for k in list(nodes_explore.keys())[:max_per_node]}
-                explore.update(nodes_explore)
+    for d in all_dict:
+        for k, v in d.items():
+            if k in w_path:
+                w_path[k] += v
             else:
-                if node in w_path:
-                    w_path[node] += weight
-                else:
-                    w_path[node] = weight
+                w_path[k] = v
 
     # extract pixels
     pixels = {}

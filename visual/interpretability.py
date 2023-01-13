@@ -1,4 +1,5 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import pandas as pd
 from data import Images
 from visual.GradCAM import make_gradcam_heatmap
@@ -38,7 +39,7 @@ def single_run(model_name, dataset, single_path, base_graph, max_per_node=1, th_
                            max_per_node=max_per_node,
                            th_paths=th_paths)
     heatmap = compute_heatmap(image, pixels)
-    plot_heatmap(image, heatmap)
+    # plot_heatmap(image, heatmap)
 
     # our method metrics
     model = get_model(model_name, model_path="", dataset=dataset)
@@ -61,7 +62,6 @@ def single_run(model_name, dataset, single_path, base_graph, max_per_node=1, th_
             (grad_curve_deletion, grad_auc_deletion)]
 
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 dataset = "imagenet"
 model_name = "VGG16"
 max_per_node = 9

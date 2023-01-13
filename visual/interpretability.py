@@ -81,7 +81,5 @@ for single_path in tqdm(os.listdir("data/imagen")):
         d = pd.DataFrame.from_dict(d)
         d.to_csv("visual/results/" + image_name + "_" + str(max_per_node) + "_" + str(th_paths) + ".csv")
         count += 1
-        if count >= 30:
-            break
     except Exception as e:
         print(single_path, e)

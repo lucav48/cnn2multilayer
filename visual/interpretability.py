@@ -3,7 +3,6 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import pandas as pd
 from data import Images
-from visual.approaches.GradCAM import make_gradcam_heatmap
 from visual.Heatmap import compute_heatmap
 from visual.NetworkPath import single_network, compute_paths
 from tensorflow.keras.preprocessing import image as keras_image
@@ -67,7 +66,8 @@ for single_path in tqdm(os.listdir("data/imagen")):
             continue
         avg_inc_drop, insert, deletion = single_run(model_name, dataset, base_path + single_path,
                                                     base_graph=base_graph,
-                                                    max_per_node=max_per_node)
+                                                    max_per_node=max_per_node,
+                                                    th_paths=th_paths)
         image_name = single_path.split("/")[-1].replace(".jpg", "")
         d = {
             "avg_curve": avg_inc_drop[0],

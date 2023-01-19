@@ -33,12 +33,12 @@ def average_drop_increase(heatmap, img, model, dataset, ground_class, labels):
 def deletion_metric(heatmap, img, model, dataset, ground_class, labels):
     curve = {}
     for th in np.arange(0, 1, 0.1):
-        low_pixels = {(i, j): heatmap[i, j] for i in range(heatmap.shape[0]) for j in range(heatmap.shape[1])}
-        low_pixels = dict(sorted(low_pixels.items(), key=lambda item: item[1]))
-        n_pixels = int(len(low_pixels) * th)
-        low_pixels = {k: low_pixels[k] for k in list(low_pixels)[:n_pixels]}
+        top_pixels = {(i, j): heatmap[i, j] for i in range(heatmap.shape[0]) for j in range(heatmap.shape[1])}
+        top_pixels = dict(sorted(top_pixels.items(), key=lambda item: item[1], reverse=True))
+        n_pixels = int(len(top_pixels) * th)
+        top_pixels = {k: top_pixels[k] for k in list(top_pixels)[:n_pixels]}
         mask = np.ones((img.shape[1:][0], img.shape[1:][1], 3), dtype=int)
-        for p in low_pixels:
+        for p in top_pixels:
             mask[p[0], p[1], 0] = 0
             mask[p[0], p[1], 1] = 0
             mask[p[0], p[1], 2] = 0
